@@ -19,10 +19,9 @@ FROM alpine:3.12
 
 WORKDIR app
 
-COPY --from=builder /build/config/app.yml ./config/app.yml
 COPY --from=builder /build/bin/* ./
+COPY --from=builder /build/views/ ./views/
+COPY --from=builder /build/config/app.yml ./config/app.yml
 
-EXPOSE 8080
-
-CMD ["./operator db:create", "./operator db:migrate", "./operator db:seed"]
-CMD ["./edge"]
+ENTRYPOINT ./edge
+EXPOSE 6009

@@ -1,0 +1,71 @@
+---
+kind: pipeline
+type: docker
+name: default
+  
+services:
+- name: mysql
+  image: mysql:8.0
+  ports:
+    - 3306
+  environment:
+    MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    MYSQL_DATABASE: opendax_development
+
+- name: vault
+  image: vault:1.6.1
+  ports:
+    - 8200
+  environment:
+    SKIP_SETCAP: "1"
+    VAULT_TOKEN: changeme
+    VAULT_DEV_ROOT_TOKEN_ID: changeme
+    VAULT_ADDR: http://vault:8200
+
+steps:
+  - name: "wait-services"
+    image: jwilder/dockerize
+    commands:
+      - dockerize -wait tcp://mysql:3306 -wait tcp://vault:8200 -timeout 1m
+
+  - name: "configure-vault"
+    image: vault:1.6.1
+    commands:
+      - vault secrets enable transit
+    environment:
+      VAULT_TOKEN: changeme
+      VAULT_DEV_ROOT_TOKEN_ID: changeme
+      VAULT_ADDR: http://vault:8200
+
+  - name: "test-mysql"
+    image: golang:1.15
+    environment:
+      GO111MODULE: "on"
+      VAULT_TOKEN: changeme
+      VAULT_APP_NAME: test
+      VAULT_ADDR: http://vault:8200
+      DB_TEST_DRIVER: "mysql"
+      DB_TEST_URL: "root:@tcp(mysql:3306)/opendax_development?charset=utf8&parseTime=True&loc=Local"
+    commands:
+      - go mod download
+      # - go test ./... -race --cover --count=10 --timeout 10m
+
+  - name: "bump-tag-stable-branch"
+    image: quay.io/openware/sdk-citools:2.4.6
+    environment:
+      BRANCH_NAME: ${DRONE_BRANCH}
+      REPO_NAME: openware/igonic
+      GITHUB_API_KEY:
+        from_secret: kite_bot_key
+    commands:
+      - BUNDLE_GEMFILE=/sdk/Gemfile bundle exec rake --rakefile=/sdk/Rakefile ci:prebuild
+    when:
+      branch:
+        - "*-stable"
+
+trigger:
+  event:
+    - push
+
+image_pull_secrets:
+  - dockerconfigjson
