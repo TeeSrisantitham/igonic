@@ -17,11 +17,10 @@ RUN make all
 #Runner
 FROM alpine:3.12
 
-WORKDIR app
+WORKDIR /app
 
 COPY --from=builder /build/bin/* ./
 COPY --from=builder /build/views/ ./views/
 COPY --from=builder /build/config/app.yml ./config/app.yml
 
 ENTRYPOINT ./edge
-EXPOSE 6009
