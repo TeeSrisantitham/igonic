@@ -19,8 +19,8 @@ FROM alpine:3.12
 
 WORKDIR /app
 
-COPY --from=builder /build/bin/* ./
+COPY --from=builder /build/bin/* ./bin/
 COPY --from=builder /build/views/ ./views/
 COPY --from=builder /build/config/app.yml ./config/app.yml
 
-ENTRYPOINT ./edge
+ENTRYPOINT ./bin/edge
