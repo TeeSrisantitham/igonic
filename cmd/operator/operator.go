@@ -24,6 +24,11 @@ func seed() {
 	config.LoadSeeds(db)
 }
 
+func seedByENV(env string) {
+	db := config.ConnectDatabase()
+	config.Seeds(db, env)
+}
+
 func usage() {
 	fmt.Println(`
 Usage: operator
@@ -51,8 +56,14 @@ func main() {
 		migrate()
 
 	case "db:seed":
-		fmt.Println("Database seed")
-		seed()
+		if len(os.Args) > 2 {
+			env := os.Args[2]
+			fmt.Println("Database seed with environment", env)
+			seedByENV(env)
+		} else {
+			fmt.Println("Database seed")
+			seed()
+		}
 
 	default:
 		fmt.Println("Invalid subcommands")
