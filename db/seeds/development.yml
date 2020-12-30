@@ -17,9 +17,8 @@ articles:
     description: this is an example of article using the openware skeleton framework
     body: |
       # Welcome the openware Gin skeleton
-      This is an example of acticle
+      This is an example of article
 
       ## What syntax to use to write an article?
       Articles are written in [Markdown](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet).
       This is a very simple language which allows to format the content of an article, add links, images..
-

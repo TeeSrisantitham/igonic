@@ -58,7 +58,7 @@ func main() {
 	case "db:seed":
 		if len(os.Args) > 2 {
 			env := os.Args[2]
-			fmt.Println("Database seed with environment", env)
+			fmt.Println("Database seed with", env)
 			seedByENV(env)
 		} else {
 			fmt.Println("Database seed")

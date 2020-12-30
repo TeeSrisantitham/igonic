@@ -1,11 +1,10 @@
 package config
 
 import (
-	"fmt"
 	"io/ioutil"
+	"reflect"
 
 	"github.com/openware/igonic/models"
-
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 )
@@ -28,15 +27,14 @@ func Seeds(db *gorm.DB, env string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("Seeding pages")
-	tx := db.Create(&Seed.Pages)
-	if tx.Error != nil {
-		return tx.Error
-	}
-	fmt.Println("Seeding articles")
-	tx = db.Create(&Seed.Articles)
-	if tx.Error != nil {
-		return tx.Error
+	
+	v := reflect.ValueOf(Seed)
+
+	for i := 0; i < v.NumField(); i++ {
+		tx := db.Create(v.Field(i).Interface())
+		if tx.Error != nil {
+			return tx.Error
+		}
 	}
 
 	return nil
