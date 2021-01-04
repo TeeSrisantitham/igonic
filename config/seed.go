@@ -22,18 +22,20 @@ func Seeds(db *gorm.DB, env string) error {
 		return err
 	}
 
-	Seed := seed{}
-	err = yaml.Unmarshal(raw, &Seed)
+	seedInfo := seed{}
+	err = yaml.Unmarshal(raw, &seedInfo)
 	if err != nil {
 		return err
 	}
-	
-	v := reflect.ValueOf(Seed)
+
+	v := reflect.ValueOf(seedInfo)
 
 	for i := 0; i < v.NumField(); i++ {
-		tx := db.Create(v.Field(i).Interface())
-		if tx.Error != nil {
-			return tx.Error
+		if !v.Field(i).IsNil()  {
+			tx := db.Create(v.Field(i).Interface())
+			if tx.Error != nil {
+				return tx.Error
+			}
 		}
 	}
 
