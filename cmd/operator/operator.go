@@ -24,9 +24,9 @@ func seed() {
 	config.LoadSeeds(db)
 }
 
-func seedByENV(env string) {
+func seedByENV(env string) error {
 	db := config.ConnectDatabase()
-	config.Seeds(db, env)
+	return config.Seeds(db, env)
 }
 
 func usage() {
@@ -59,7 +59,10 @@ func main() {
 		if len(os.Args) > 2 {
 			env := os.Args[2]
 			fmt.Println("Database seed with", env)
-			seedByENV(env)
+			err := seedByENV(env)
+			if err != nil {
+				fmt.Println("Error", err)
+			}
 		} else {
 			fmt.Println("Database seed")
 			seed()

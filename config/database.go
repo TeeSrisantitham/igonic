@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
+
 // ConnectDatabase : connect to database MySQL using gorm
 // gorm (GO ORM for SQL): http://gorm.io/docs/connecting_to_the_database.html
 func ConnectDatabase() (db *gorm.DB) {

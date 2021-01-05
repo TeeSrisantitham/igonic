@@ -2,6 +2,8 @@ package config
 
 import (
 	"io/ioutil"
+	"os"
+	"path/filepath"
 	"reflect"
 
 	"github.com/openware/igonic/models"
@@ -11,7 +13,7 @@ import (
 
 // Seed structure
 type seed struct {
-	Pages []models.Page `yaml:"pages"`
+	Pages    []models.Page    `yaml:"pages"`
 	Articles []models.Article `yaml:"articles"`
 }
 
@@ -28,7 +30,7 @@ func insertToDB(db *gorm.DB, seedInfo seed) error {
 	v := reflect.ValueOf(seedInfo)
 
 	for i := 0; i < v.NumField(); i++ {
-		if !v.Field(i).IsNil()  {
+		if !v.Field(i).IsNil() {
 			tx := db.Create(v.Field(i).Interface())
 			if tx.Error != nil {
 				return tx.Error
@@ -41,11 +43,13 @@ func insertToDB(db *gorm.DB, seedInfo seed) error {
 // Seeds import seeds files into database by env yml file
 func Seeds(db *gorm.DB, env string) error {
 	var seedInfo seed
-	
-	err := readENVFile("db/seeds/" + env, &seedInfo)
+	dir, err := os.Getwd()
+	path := filepath.Join(dir, "db/seeds/" + env)
+
+	err = readENVFile(path, &seedInfo)
 	if err != nil {
 		return err
 	}
-	
+
 	return insertToDB(db, seedInfo)
 }

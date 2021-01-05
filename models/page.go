@@ -14,7 +14,7 @@ import (
 type Page struct {
 	ID          uint   `gorm:"primarykey"`
 	Path        string `gorm:"unique_index" yaml:"path"`
-	Lange       string `yaml:"lang"`
+	Lang        string `yaml:"lang"`
 	Title       string `yaml:"title"`
 	Keywords    string `yaml:"keywords"`
 	Description string `yaml:"description"`
