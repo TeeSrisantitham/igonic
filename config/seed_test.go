@@ -8,6 +8,7 @@ import (
 	"github.com/openware/igonic/helper"
 	"github.com/openware/igonic/models"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 )
 
@@ -36,18 +37,16 @@ func compareArticle(a1 *models.Article, a2 *models.Article) bool {
 	return false
 }
 
-func TestSeeds(t *testing.T) {
+func TestSuccess(t *testing.T) {
+	// connect to test db
 	ctx := helper.GetTestContext()
+
+	// change root path to project root
 	os.Chdir("..")
 	
-	env := "test.yml"
-
 	migrateDB(ctx)
-	err := Seeds(ctx, env)
-	if err != nil {
-		t.Error(err)
-	}
 
+	// prepare expect result
 	pageExpected := models.Page{
 		Path: "/terms",
 		Lang: "EN",
@@ -67,6 +66,12 @@ func TestSeeds(t *testing.T) {
 		Body: fmt.Sprintf("# Welcome the openware Gin skeleton\nThis is an example of article\n\n## What syntax to use to write an article?\nArticles are written in [Markdown](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet).\nThis is a very simple language which allows to format the content of an article, add links, images..\n"),
 	} 
 
+	// call function seeds
+	env := "test.yml"
+	err := Seeds(ctx, env)
+	require.Equal(t, nil, err, "It should no error")
+
+	// run test
 	t.Run("Page", func(t *testing.T) {
 		var page models.Page
 		result := ctx.First(&page)
@@ -77,10 +82,35 @@ func TestSeeds(t *testing.T) {
 	t.Run("Article", func(t *testing.T) {
 		var article models.Article
 		result := ctx.First(&article)
-
 		assert.EqualValues(t, 1, result.RowsAffected)
 		assert.EqualValues(t, true, compareArticle(&articleExpected, &article))
 	})
+}
+
+func TestFail_FileNotFound(t *testing.T) {
+	// connect to test db
+	ctx := helper.GetTestContext()
+	
+	migrateDB(ctx)
+	
+	// call function
+	env := "empty_test.yml"
+	err := Seeds(ctx, env)
+
+	// run test
+	assert.Error(t, err)
+}
+
+func TestFail_DB(t *testing.T) {
+	// connect to test db
+	ctx := helper.GetTestContext()
+	
+	// call function
+	env := "test.yml"
+	err := Seeds(ctx, env)
+
+	// run test
+	assert.Error(t, err)
 }
 
 func migrateDB(ctx *gorm.DB) {
