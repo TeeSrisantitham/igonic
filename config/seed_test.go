@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"testing"
+	"os"
 
 	"github.com/openware/igonic/helper"
 	"github.com/openware/igonic/models"
@@ -37,7 +38,8 @@ func compareArticle(a1 *models.Article, a2 *models.Article) bool {
 
 func TestSeeds(t *testing.T) {
 	ctx := helper.GetTestContext()
-
+	os.Chdir("..")
+	
 	env := "test.yml"
 
 	migrateDB(ctx)
